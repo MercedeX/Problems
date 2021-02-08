@@ -7,16 +7,17 @@ import com.Problems.NQueens.Structures.Structures.display
 import scala.io.StdIn
 import scala.util.{Try, Failure, Success}
 
-object Application{
-  def promptForInt(message: String):Int={
-    print(s"$message:")
-    StdIn.readLine().toInt
-  }
-  def promptForIntPair(message: String) = {
-    //val pattern = "\\s*(\\d+)\\s*\\,\\s*(\\d+)\\s*".r
-    print(s"$message:")
-    Try(
-      StdIn
+object Application {
+
+  /**
+   * Asks the user to input the board size in L,B format. if incorrect size or no size is given then 8x8 is used by default
+   * @param message
+   * @return Board of specified size
+   */
+  def getBoard() = {
+    print(s"Enter board size (default 8x8):")
+    val size = Try(
+        StdIn
         .readLine()
         .split(",")
         .map(x => x.trim.toInt)
@@ -25,20 +26,31 @@ object Application{
       case Success(numbers) => Position(numbers(0), numbers(1))
       case Failure(_) => Position(8, 8)
     }
-  }
-  def readKey = System.in.read()
-  val getBoard = ()=> {
-    val Position(rows, columns) = promptForIntPair("Get board size")
-    Board(rows, columns)
-  }
-  val getQueensTobePlaced = ()=> promptForInt("how many queens") match{
-    case n if n<0 => 0
-    case x => x
+    Board(size.x, size.y)
   }
 
-  def main(args: Array[String]): Unit ={
+  /**
+   * Prompts the user to input the number of queens for which the solution to be found
+   * @return: number of queens or 0 if user inputs 0 or <0
+   */
+  def getQueensTobePlaced() = {
+    print("how many queens:")
+    val queens = Try(StdIn.readLine().toInt) match {
+      case Success(n) => if (n < 0) 0 else n
+      case _ => 0
+    }
+    queens
+  }
+
+
+  /**
+   * void Main(string[] args) of Scala
+   * @param args: string array
+   */
+  def main(args: Array[String]): Unit = {
     val myBoard = getBoard()
-    val queens = getQueensTobePlaced();
+    val queens = getQueensTobePlaced()
+
     val finalBoard = Solve(myBoard, queens)
 
     display(finalBoard)

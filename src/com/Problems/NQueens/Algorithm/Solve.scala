@@ -3,12 +3,39 @@ package com.Problems.NQueens.Algorithm
 import com.Problems.NQueens.Structures.{Board, Position, Empty, Queen, Blocked}
 
 object Solve {
+  /**
+   * Given a board and the number of queens, the algorithm tries to find a solution using BACK-TRACKING technique.
+   * @param board of NxN size
+   * @param queens: no of queens to be placed on board
+   * @return : final board
+   */
     def apply(board: Board, queens: Int) = {
+      /**========================
+       *  LOCAL FUNCTIONS
+       *
+       *  I'm using local functions because I want to have a single function provide the solution.
+       *  in Scala, local functions must be declared before anything else.
+       * ================ */
+
+      /**
+       * Gets an Iterable of Position that are "Empty"
+        * @param b1: Board
+       * @return: Iterable[Position]
+       */
     def getAvailablePositions(b1: Board):Iterable[Position] = {
       var items = for(x<- 0 to b1.limits.x;y<- 0 to b1.limits.y if b1(x, y) == Empty)
                     yield Position(x,y)
       items.toIterable
     }
+
+      /**
+       * Calculates the positons that are affected by the queen placement on the board
+       * @param cur: Current position
+       * @param limit: Size of the board
+       * @param xop: function that gives the next position of X
+       * @param yop: function that gives the next position of Y
+       * @return: a Seq[Position] that are affected
+       */
     def calculatePositions(cur: Position, limit: Position, xop: (Int) => Int, yop: (Int) => Int): Seq[Position] = {
       val buffer = new scala.collection.mutable.ListBuffer[Position]()
       var Position(x, y) = cur
@@ -19,6 +46,13 @@ object Solve {
       }
       buffer.distinct.toSeq
     }
+
+      /**
+       * Places a queen at a position if possible, calculates the Squares that are affected, marks them and returns the board
+       * @param b1: Current Board
+       * @param position: Position of the Queen placement
+       * @return: New Board
+       */
     def tryPlacingQueenAt(b1: Board, position: Position): Option[Board] = {
       var limits = b1.limits
 
@@ -51,6 +85,12 @@ object Solve {
       })
       res2
     }
+
+      /**
+       * Iteratively, places a queen on board, calculates positions, then repeats until either no queens are left to place or the board is full
+       * @param b1: Initial Board
+       * @return: Final board
+       */
     def calculate(b1: Board): (Boolean, Board) = {
       for (position <- getAvailablePositions(b1)) {
         val b0 = tryPlacingQueenAt(b1, position)
@@ -65,7 +105,14 @@ object Solve {
       }
       (false, Board(0, 0))
     }
-    def iterative(b1: Board, q1: Int) ={
+
+      /**
+       * Iterative solution, faster, crude but simple
+       * @param b1: Board
+       * @param q1: queens
+       * @return: final board
+       */
+    def iterative_solution(b1: Board, q1: Int) ={
       var currentBoard = b1
       var count = queens
       var continue = true
@@ -78,16 +125,23 @@ object Solve {
       }
       currentBoard
     }
-    def recurse(input: Board, q1: Int): Board = {
-      def innerRecursion(input: (Boolean,Board), q1: Int): (Boolean,Board)={
+
+      /**
+       * recursive solution: slow: elegant but hard to debug
+       * @param input
+       * @param q1
+       * @return
+       */
+    def recursive_solution(input: Board, q1: Int): Board = {
+      def recurse(input: (Boolean,Board), q1: Int): (Boolean,Board)={
         val (success, b1) = input
         if(success) {
           q1 match {
             case 0 => (true, b1)   // Nothing to do
             case 1 => calculate(b1)  // Solve for base case
             case n => {
-              val tmp = innerRecursion(input, q1 - 1) // Solve for N-1
-              innerRecursion(tmp, 1)  // Now solve for N
+              val tmp = recurse(input, q1 - 1) // Solve for N-1
+              recurse(tmp, 1)  // Now solve for N
             }
           }
         }
@@ -95,13 +149,20 @@ object Solve {
           input
       }
 
-      var (_, solution) = innerRecursion((true, board), queens)
+      var (_, solution) = recurse((true, board), queens)
       solution
     }
 
-    // Two ways of solving same problem, uncomment any one
-    recurse(board, queens)
-    //iterative(board, queens)
+
+     /** Algorithm starts,
+      *  We have an iterative solution or a recursive solution.
+      *  recursive is elegant but slightly fucked up in debugging
+      *  iterative one is plain and simple to understand and debug.
+      * */
+
+
+    recursive_solution(board, queens)
+    //iterative_solution(board, queens)
 
   }
 
